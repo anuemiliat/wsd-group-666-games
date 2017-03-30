@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<title>TIC-TAC-TOE EBIN</title>
+
+<head>
+  <style>
+
+
+
+    p {
+      font-size: 200%;
+
+      font-weight: bold;
+      margin-top: auto;
+
+    }
+
+    #turn {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    td {
+      font-size: 300%;
+      color: blue;
+      font-weight: bold;
+      font-family: verdana;
+      border-radius: 5px;
+    }
+
+    #turn {
+      font-weight: bold;
+      font-size: 20pt;
+    }
+
+    .Square {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+    }
+
+    #restart {
+      font-weight: bold;
+      font-size: 18pt;
+      background-color: yellow;
+      border-radius: 5px;
+      border-color: black;
+      position: absolute;
+
+    }
+
+    #humanscore {
+      font-weight: bold;
+    }
+
+    #computerscore {
+      font-weight: bold;
+    }
+
+    .scoreboard1 {
+      display: inline-block;
+      font-family: verdana;
+      padding-right: 20px;
+
+    }
+
+    .scoreboard {
+      padding-right: 20px;
+      font-family: verdana;
+      display: inline-block;
+
+    }
+
+    #roundcounter {
+      font-size: 20px;
+    }
+
+
+
+  </style>
+</head>
+
+  <script>
+    var round = 1;
+    var humanScore = 0;
+    var computerScore = 0;
+    var switches = 0;
+    var found = false;
+
+    function gameStart() {
+      switches = 0;
+      document.getElementById("humanscore").innerText = humanScore;
+      document.getElementById("computerscore").innerText = computerScore;
+      //if (round < 5) {
+        document.getElementById("roundcounter").innerText = "CURRENT ROUND: "+round+"/5";
+      //}
+      if (round == 6) {
+        alert("GAME OVER! YOUR SCORE: " + (humanScore - computerScore))
+        computerScore = 0;
+        humanScore = 0;
+        switches = 0;
+        round = 1;
+      }
+      for (var i = 1; i < 10; i++) {
+        clearBox(i);
+      }
+
+      //var starters = Array("X", "O");
+      //document.turn = starters[Math.floor(Math.random()*starters.length)];
+      document.winner = null;
+      document.turn = "X";
+      setMessage(document.turn + " is in turn.");
+    }
+
+    function setMessage(msg) {
+      document.getElementById("turn").innerText = msg;
+    }
+
+    function nextMove(square) {
+
+
+      if (document.winner != null) {
+
+        setMessage(document.winner + " already won the game! Press RESTART to play again.");
+
+        //document.getElementById("roundcounter").innerText = "CURRENT ROUND: "+round+"/5";
+      }
+
+
+        else if (switches >= 9) {
+
+          setMessage("GAME OVER! RESULT: DRAW.");
+          round++;
+          //document.getElementById("roundcounter").innerText = "CURRENT ROUND: "+round+"/5";
+        }
+
+        else if (square.innerText == "") {
+          square.innerText = document.turn;
+          switches++;
+          computerMove();
+        }
+
+        else {
+          setMessage("Square already used. Still " + document.turn + "'s turn.")
+        }
+
+
+      }
+
+      function computerMove() {
+
+        if (checkForWinner(document.turn)) {
+
+          setMessage(document.turn + " HAS WON THE GAME!")
+          document.winner = document.turn;
+          humanScore++;
+          document.getElementById("humanscore").innerText = humanScore;
+
+          round++;
+          //document.getElementById("roundcounter").innerText = "CURRENT ROUND: "+round+"/5";
+        }
+
+        else if (switches >= 8) {
+
+          setMessage("GAME OVER! RESULT: DRAW.");
+          round++;
+          //document.getElementById("roundcounter").innerText = "CURRENT ROUND: "+round+"/5";
+        }
+
+        else {
+
+          while (found == false) {
+
+            var compMove = "s" + Math.floor(Math.random() * (((9 - 1) + 1))+ 1);
+            if (document.getElementById(compMove).innerText == "") {
+              document.getElementById(compMove).innerText = "O";
+              found = true;
+            }
+
+            if (checkForWinner("O")) {
+              setMessage("O HAS WON THE GAME!")
+              document.winner = "O"
+              computerScore++;
+              document.getElementById("computerscore").innerText = computerScore;
+
+              round++;
+              //document.getElementById("roundcounter").innerText = "CURRENT ROUND: "+round+"/5";
+            }
+
+          }
+
+          found = false;
+          switches++;
+        }
+      }
+
+      function checkForWinner(move) {
+        var result = false;
+        if (checkRow(1, 2, 3, move) ||
+            checkRow(4, 5, 6, move) ||
+            checkRow(7, 8, 9, move) ||
+            checkRow(1, 5, 9, move) ||
+            checkRow(1, 4, 7, move) ||
+            checkRow(2, 5, 8, move) ||
+            checkRow(3, 6, 9, move) ||
+            checkRow(3, 5, 7, move)) {
+
+            result = true;
+          }
+
+        return result;
+      }
+
+      function checkRow(a, b, c, move) {
+        var result = false;
+        if (getBox(a) == move && getBox(b) == move && getBox(c) == move) {
+          result = true;
+        }
+
+        return result;
+
+      }
+
+      function getBox(number) {
+        return document.getElementById("s" + number).innerText;
+      }
+
+      function clearBox(square) {
+        document.getElementById("s" + square).innerText = "";
+      }
+
+  </script>
+
+</head>
+
+<body id="body" onload="gameStart();">
+  <p>WELCOME!</p>
+
+  <div class="scoreboard">YOUR SCORE:</div>
+  <div class="scoreboard"  id="humanscore"></div>
+
+  <div class="scoreboard1">COMPUTER'S SCORE:</div>
+  <div class="scoreboard1"  id="computerscore"></div>
+
+  <div id="roundcounter">CURRENT ROUND:</div>
+
+  <div id="turn"></div>
+  <table id="table" border="4px">
+    <tr>
+      <td id="s1" class="Square" onclick="nextMove(this);"></td>
+      <td id="s2" class="Square" onclick="nextMove(this);"></td>
+      <td id="s3" class="Square" onclick="nextMove(this);"></td>
+    </tr>
+
+    <tr>
+      <td id="s4" class="Square" onclick="nextMove(this);"></td>
+      <td id="s5" class="Square" onclick="nextMove(this);"></td>
+      <td id="s6" class="Square" onclick="nextMove(this);"></td>
+    </tr>
+
+    <tr>
+      <td id="s7" class="Square" onclick="nextMove(this);"></td>
+      <td id="s8" class="Square" onclick="nextMove(this);"></td>
+      <td id="s9" class="Square" onclick="nextMove(this);"></td>
+    </tr>
+  </table>
+
+  <button id="restart" onclick="gameStart();">RESTART</button>
+
+
+</body>
+</html>

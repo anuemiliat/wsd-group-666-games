@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Joku hieno</title>
+  <meta charset="utf-8"/>
+  <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script>
+  var tyhjalaatikko = 9;
+  var siirrot = 0;
+  function gameStart() {
+    "use strict";
+
+
+    arvonumerot();
+
+    document.getElementById("voitettu").innerText = "Peli kesken.";
+
+    function arvonumerot() {
+      var numero = 1;
+      while ( numero < 9 ){
+        var numeronpaikka = "s" + Math.floor((Math.random() * 8) + 1);
+        if (document.getElementById(numeronpaikka).innerText == "") {
+          document.getElementById(numeronpaikka).innerText = numero;
+
+          numero = numero + 1;
+        }
+      }
+    }
+
+  }
+
+  function nextMove(square) {
+    if (square.innerText != "") {
+      var apu = square.innerText;
+      square.innerText = "";
+      if (tyhjalaatikko == 9){
+
+        document.getElementById("s" + tyhjalaatikko).innerText = apu;
+
+      }
+      else{
+
+        tyhjalaatikko.innerText = apu;
+
+      }
+      tyhjalaatikko = square;
+      siirrot = siirrot + 1;
+      onkoVoitettu();
+
+    }
+  }
+
+  function onkoVoitettu(){
+    var oikeat = 0;
+    var apu = 1;
+    while ( apu < 9 ){
+      if (document.getElementById("s" + apu).innerText == apu) {
+        oikeat = oikeat + 1;
+      }
+      apu = apu + 1;
+
+    }
+    if (oikeat == 8){
+      document.getElementById("voitettu").innerText = "Peli voitettu. Käytit "
+      + siirrot + " siirtoa.";
+    }
+
+  }
+
+  </script>
+  <style>
+
+  div, p {
+    font-size: 100%;
+    color: green;
+    font-weight: bold;
+    font-family: verdana;
+
+  }
+
+  td {
+    font-size: 300%;
+    color: green;
+    font-weight: bold;
+    font-family: verdana;
+
+  }
+
+  .Square {
+    width: 100px;
+    height: 100px;
+    text-align: center;
+  }
+
+
+
+  </style>
+
+
+</head>
+<body id="body" onload="gameStart();">
+
+  <p>Vaihda numero tyhjään ruutuun painamalla numerosta.<br>
+    Tyhjä ruutu siirtyy numeron kohdalle.<br>
+    Voitat pelin, kun olet järjestänyt numerot järjestykseen<br>
+    pienimmästä suurempaan, vasemmalta oikealle ja ylhäältä alas.<br>
+    Oikean alareunan tulee olla lopussa tyhjä ruutu.<br>
+    Yritä saada oikea järjestys mahollisimman pienellä määrällä siirtoja.</p>
+
+  <div id="voitettu"></div>
+  <table id="table" border="4px">
+    <tr>
+      <td id="s1" class="Square" onclick="nextMove(this);"></td>
+      <td id="s2" class="Square" onclick="nextMove(this);"></td>
+      <td id="s3" class="Square" onclick="nextMove(this);"></td>
+    </tr>
+
+    <tr>
+      <td id="s4" class="Square" onclick="nextMove(this);"></td>
+      <td id="s5" class="Square" onclick="nextMove(this);"></td>
+      <td id="s6" class="Square" onclick="nextMove(this);"></td>
+    </tr>
+
+    <tr>
+      <td id="s7" class="Square" onclick="nextMove(this);"></td>
+      <td id="s8" class="Square" onclick="nextMove(this);"></td>
+      <td id="s9" class="Square" onclick="nextMove(this);"></td>
+    </tr>
+  </table>
+
+</body>
+</html>

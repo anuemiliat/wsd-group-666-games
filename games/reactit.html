@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Reactiongame</title>
+</head>
+<body>
+
+<h1>React-it</h1>
+<p>Hit "Start game" and press "STOP timer" as soon as the field turns green <br>
+Repeat 5 times and the median will be your result. If you press the STOP <br> button while
+the field is yellow, your result for that round is 1 second.</p>
+
+<input type="button" value="Start game" onClick="startit()">
+<input type="button" value="STOP timer" onClick="stopTest()"><br>
+
+<canvas id="gamecanvas" width="200" height="200" style="border:1px solid #000000;"></canvas>
+
+<div id="ripuli"></div>
+
+<script language="JavaScript">
+
+var startTime=new Date();
+var endTime=new Date();
+var startPressed=false;
+var colourChanged=false;
+var maxWait=20;
+var timerID;
+var results = [0, 0, 0, 0, 0];
+var testcount = 0;
+
+function startTest()
+{
+	var c = document.getElementById("gamecanvas");
+    var ctx = c.getContext("2d");
+    ctx.font = "30px arial"
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0,0,200,200);
+    ctx.fillStyle = 'black';
+    ctx.fillText("STOP",50,100);
+    colourChanged = true;
+    startTime = new Date();
+		changeMessage("");
+}
+
+function remark(responseTime)
+{
+	var responseString="";
+	if (responseTime < 0.10)
+		responseString="Well done!";
+	if (responseTime >= 0.10 && responseTime < 0.20)
+		responseString="Nice!";
+	if (responseTime >=0.20 && responseTime < 0.30)
+		responseString="Could be better...";
+	if (responseTime >=0.30 && responseTime < 0.60)
+		responseString="Keep practising!";
+	if (responseTime >=0.60 && responseTime < 1)
+		responseString="Have you been drinking?";
+	if (responseTime >=1)
+		responseString="Did you fall asleep?";
+
+	return responseString;
+}
+
+function stopTest()
+{
+	if ( testcount == 5 ) {
+
+    	sum = results[0]+results[1]+results[2]+results[3]+results[4];
+			average = sum / 5;
+			var score = 100 / average;
+			var msg = {
+					"messageType": "SCORE",
+					"score": score
+			};
+			var resultText = "Your average reaction time is: " + average.toFixed(3) + "s. Score: " + score.toFixed(0);
+    	// alert("Your average reaction time is: " + average.toFixed(3) + " Score: " + score.toFixed(0));
+			changeMessage(resultText);
+			resetgame();
+			window.parent.postMessage(score, "*");
+    }
+
+	else if(colourChanged)
+	{
+		endTime=new Date();
+		var responseTime=(endTime.getTime()-startTime.getTime())/1000;
+
+        results[testcount - 1] = responseTime;
+		startPressed=false;
+		colourChanged=false;
+        resetcanvas();
+
+		var screenmessage = responseTime + "s. " + remark(responseTime);
+
+		changeMessage(screenmessage);
+	}
+
+	else if (!startPressed) {
+
+		// alert("Start the game first!");
+		changeMessage("Start the game first!");
+	}
+
+	else
+	{
+
+			clearTimeout(timerID);
+			startPressed=false;
+            resetcanvas();
+            results[testcount - 1] = 2;
+
+			// alert("Too early, 1 sec is your time for this round!");
+			changeMessage("Too early, 1 sec is your time for this round!");
+
+	}
+}
+
+var randMULTIPLIER=0x015a4e35;
+var randINCREMENT=1;
+var today=new Date();
+var randSeed=today.getSeconds();
+function randNumber()
+{
+	randSeed = (randMULTIPLIER * randSeed + randINCREMENT) % (1 << 31);
+	return((randSeed >> 15) & 0x7fff) / 32767;
+}
+
+function startit()
+{
+	changeMessage("");
+	if ( testcount == 5 ) {
+		resetgame();
+		testcount++;
+	}
+
+	else if ( startPressed ) {
+			changeMessage("Game already started, wait for STOP!")
+	}
+
+	else {
+
+		startPressed=true;
+		waitcanvas();
+		testcount++;
+		timerID=setTimeout('startTest()', 6000*randNumber());
+
+	}
+
+}
+
+function resetcanvas()
+{
+	changeMessage("");
+	var c = document.getElementById("gamecanvas");
+    var ctx = c.getContext("2d");
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect(0,0,200,200);
+    ctx.fillStyle = 'black';
+    ctx.font = "30px arial";
+    ctx.fillText("Press START",20,100);
+}
+
+function waitcanvas()
+{
+	changeMessage("");
+	var c = document.getElementById("gamecanvas");
+    var ctx = c.getContext("2d");
+
+	ctx.fillStyle = 'yellow';
+    ctx.fillRect(0,0,200,200);
+    ctx.fillStyle = 'black';
+    ctx.font = "30px arial";
+    ctx.fillText("WAIT",50,100);
+
+}
+
+function resetgame()
+{
+	startPressed = false;
+	colourChanged=false;
+	results = [0, 0, 0, 0, 0]
+  testcount = 0;
+
+	var c = document.getElementById("gamecanvas");
+    var ctx = c.getContext("2d");
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect(0,0,200,200);
+    ctx.fillStyle = 'black';
+    ctx.font = "30px arial";
+    ctx.fillText("Press START",20,100);
+}
+
+function changeMessage(msg) {
+	document.getElementById("ripuli").innerHTML = msg;
+
+}
+
+</script>
+
+</body>
+</html>

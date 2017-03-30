@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Game</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="sqlinjectionpro2017.css">
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+        // TODO: Make it to communicate with the POST message method
+        // TODO: Savegame
+        // TODO: Loadgame
+        //      TODO: OPTIONAL: Check loadgame data
+        // TODO: GameOver reset score, post score
+
+        "use strict";
+        /* global $, alert */
+
+        $(document).ready( function()
+        {
+            var h3 = document.getElementById('time'),
+                start = document.getElementById('start'),
+                stop = document.getElementById('stop'),
+                clear = document.getElementById('clear'),
+                load = document.getElementById('load'),
+                save = document.getElementById('save'),
+                scoreElement = document.getElementById('score'),
+                score = 0,
+                seconds = 10,
+                mseconds = 0,
+                gamestarted = false,
+                t;
+
+            function gameover() {
+                alert("Game over! Score: " + score);
+                clearTimeout(t);
+                gamestarted = false;
+                seconds = 10;
+                mseconds = 0;
+                var msg = {
+                    "messageType": "SCORE",
+                    "score": score
+                };
+                score = 0;
+                scoreElement.textContent = "Score: " + score;
+                window.parent.postMessage(msg, "*");
+            }
+
+            function subtract() {
+                mseconds--;
+                if (mseconds < 0) {
+                    mseconds = 99;
+                    seconds--;
+                    if (seconds < 0) {
+                        gameover(); }
+                    else {
+                        timer(); }}
+                else {
+                        timer(); }
+                h3.textContent = "Time: " + (seconds > 9 ? seconds : "0" + seconds) + ":" +  (mseconds > 9 ? mseconds : "0" + mseconds);
+            }
+
+
+            function timer() {
+                t = setTimeout(subtract, 10); }
+
+            function startgame() {
+                if (!gamestarted) {
+                    gamestarted = true;
+                    timer();
+                }
+            }
+
+            start.onclick = function() {
+                startgame();
+            }
+
+            $('form').on('submit', function(e){
+                e.preventDefault();
+                var form = document.getElementById("gameform");
+
+                // Check if valid SQL injection
+                var formvalues = document.getElementById('username').value;
+                formvalues += document.getElementById("email").value;
+                formvalues += document.getElementById("pwd").value;
+                formvalues += document.getElementById("pwd2").value;
+                //alert(formvalues);
+                var validInjection = "); DROP TABLE *;--";
+                var sqlindex = formvalues.indexOf(validInjection);
+
+                if (gamestarted && sqlindex !== -1) {
+                    score += 10;
+                    scoreElement.textContent = "Score: " + score;
+                    form.reset();
+                }
+
+            });
+
+            // Sends this game's state to the service.
+            // The format of the game state is decided
+            // by the game
+            save.click( function () {
+                var msg = {
+                    "messageType": "SAVE",
+                    "gameState": {
+                        "seconds": seconds,
+                        "mseconds": mseconds,
+                        "score": score
+                    }
+                };
+                window.parent.postMessage(msg, "*");
+            });
+
+            // Sends a request to the service for a
+            // state to be sent, if there is one.
+            $("#load").click( function () {
+                var msg = {
+                    "messageType": "LOAD_REQUEST",
+                };
+                window.parent.postMessage(msg, "*");
+            });
+
+            // Listen incoming messages, if the messageType
+            // is LOAD then the game state will be loaded.
+            // Note that no checking is done, whether the
+            // gameState in the incoming message contains
+            // correct information.
+            //
+            // Also handles any errors that the service
+            // wants to send (displays them as an alert).
+            window.addEventListener("message", function(evt) {
+                if(evt.data.messageType === "LOAD") {
+                    score = evt.data.gameState.score;
+                    seconds = evt.data.gameState.seconds;
+                    mseconds = evt.data.gameState.mseconds;
+                    scoreElement.text(score);
+                    h3.textContent = "Time: " + (seconds > 9 ? seconds : "0" + seconds) + ":" +  (mseconds > 9 ? mseconds : "0" + mseconds);
+                } else if (evt.data.messageType === "ERROR") {
+                    alert(evt.data.info);
+                }
+            });
+
+            // Request the service to set the resolution of the
+            // iframe correspondingly
+            var message =  {
+                messageType: "SETTING",
+                options: {
+                    "width": 700, //Integer
+                    "height": 500 //Integer
+                }
+            };
+            window.parent.postMessage(message, "*");
+        });
+    </script>
+</head>
+<body>
+<div id = titlearea>
+    <h2 id = "mygametitle">SQL Injection Pro 2017</h2>
+    <p id = gameidea>
+        The idea of the game is to drop all tables in the database as many times as you can in 10 seconds
+        using SQL-injection in the form below. Type "'); DROP TABLE *;--" in any of the fields below to
+        and press "Submit" to do this. Save button saves the current time and score and load loads previous
+        saved game.
+    </p>
+    <h3 id = "time"><time>Time: 10:00</time></h3>
+    <div id = buttons>
+        <button id="start">START</button>
+        <button id="load">Load</button>
+        <button id="save">Save</button>
+    </div>
+    <h3 id = "score">Score: 0</h3>
+</div>
+
+
+<div id = "gamearea">
+    <form id="gameform">
+        Username: <input id="username" type="text" name="username"><br>
+        Email: <input id="email" type="text" name="email"><br>
+        Password: <input id="pwd" type="password" name="password"><br>
+        Password again: <input id="pwd2" type="password" name="passwordagain"><br>
+        <input type="submit" name="submit"><br>
+    </form>
+</div>
+
+</body>
+</html>
