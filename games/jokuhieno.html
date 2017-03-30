@@ -7,13 +7,23 @@
   <script>
   var tyhjalaatikko = 9;
   var siirrot = 0;
+  var pisteet = 0;
+  var enkkapisteet = 0;
   function gameStart() {
     "use strict";
 
 
+    for (var i = 1; i < 10; i++) {
+      document.getElementById("s" + i).innerText = "";
+    }
+
     arvonumerot();
 
     document.getElementById("voitettu").innerText = "Peli kesken.";
+    document.getElementById("pisteet").innerText = "Pelin pisteet: ";
+    document.getElementById("kok_pisteet").innerText = "Kokonaispisteet: " + pisteet;
+    document.getElementById("enkka").innerText =
+    "Ennätyspisteet yhdestä pelistä: " + enkkapisteet;
 
     function arvonumerot() {
       var numero = 1;
@@ -53,6 +63,7 @@
   function onkoVoitettu(){
     var oikeat = 0;
     var apu = 1;
+    var apu_pisteet = 0;
     while ( apu < 9 ){
       if (document.getElementById("s" + apu).innerText == apu) {
         oikeat = oikeat + 1;
@@ -61,8 +72,49 @@
 
     }
     if (oikeat == 8){
+
+      if(siirrot <= 7){
+        pisteet = pisteet + 100;
+        apu_pisteet = 100;
+      }
+      else if (siirrot == 8) {
+        pisteet = pisteet + 80;
+        apu_pisteet = 80;
+
+      }
+      else if (siirrot == 9) {
+        pisteet = pisteet + 60;
+        apu_pisteet = 60;
+
+      }
+      else if (siirrot == 10) {
+        pisteet = pisteet + 40;
+        apu_pisteet = 40;
+
+      }
+      else if (siirrot == 11) {
+        pisteet = pisteet + 20;
+        apu_pisteet = 20;
+
+      }
       document.getElementById("voitettu").innerText = "Peli voitettu. Käytit "
-      + siirrot + " siirtoa.";
+      + siirrot + " siirtoa." ;
+      document.getElementById("pisteet").innerText = "Pelin pisteet: "
+      + apu_pisteet;
+      document.getElementById("kok_pisteet").innerText = "Kokonaispisteet: "
+      + pisteet;
+
+      if (enkkapisteet < apu_pisteet){
+        enkkapisteet = apu_pisteet;
+        document.getElementById("enkka").innerText =
+        "Ennätyspisteet yhdestä pelistä: " + enkkapisteet;
+      }
+      siirrot = 0;
+      var msg = {
+        "messageType": "SCORE",
+        "score": apu_pisteet
+      };
+      window.parent.postMessage(msg, "*");
     }
 
   }
@@ -108,6 +160,9 @@
     Yritä saada oikea järjestys mahollisimman pienellä määrällä siirtoja.</p>
 
   <div id="voitettu"></div>
+  <div id="pisteet"></div>
+  <div id="kok_pisteet"></div>
+  <div id="enkka"></div>
   <table id="table" border="4px">
     <tr>
       <td id="s1" class="Square" onclick="nextMove(this);"></td>
@@ -127,6 +182,7 @@
       <td id="s9" class="Square" onclick="nextMove(this);"></td>
     </tr>
   </table>
+  <button id="restart" onclick="gameStart();">RESTART</button>
 
 </body>
 </html>
