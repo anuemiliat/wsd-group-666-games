@@ -2,22 +2,66 @@
 <html>
 <head>
 <title>Reactiongame</title>
+<style>
+
+body {
+	background-color: tan;
+}
+
+div {
+	font-family: helvetica
+}
+
+p {
+	font-family: helvetica;
+	font-weight: bolder;
+  left: 30%;
+
+}
+li {
+  text-align:center;
+}
+
+h1 {
+	font-family: helvetica
+}
+
+
+ul {
+  list-style-type: none;
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>React-it</h1>
+<ul>
+<li>
+  <h1>React-it</h1>
 <p>Hit "Start game" and press "STOP timer" as soon as the field turns green <br>
 Repeat 5 times and the median will be your result. If you press the STOP <br> button while
 the field is yellow, your result for that round is 1 second.</p>
 
-<input type="button" value="Start game" onClick="startit()">
-<input type="button" value="STOP timer" onClick="stopTest()"><br>
+<input type="button" id="button1" value="Start game" onClick="startit()" >
+<input type="button" id="button2" value="STOP timer" onClick="stopTest()"><br>
 
 <canvas id="gamecanvas" width="200" height="200" style="border:1px solid #000000;"></canvas>
 
-<div id="ripuli"></div>
+<div id="asd"></div>
+</li>
+</ul>
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script>
 
-<script language="JavaScript">
+var message =  {
+                messageType: "SETTING",
+                options: {
+                    "width": 700, //Integer
+                    "height": 500 //Integer
+                }
+            };
+            window.parent.postMessage(message, "*");
 
 var startTime=new Date();
 var endTime=new Date();
@@ -65,9 +109,13 @@ function stopTest()
 {
 	if ( testcount == 5 ) {
 
+			clearTimeout(timerID);
+			endTime=new Date();
+			var responseTime=(endTime.getTime()-startTime.getTime())/1000;
+			results[testcount] = responseTime
     	sum = results[0]+results[1]+results[2]+results[3]+results[4];
 			average = sum / 5;
-			var score = 100 / average;
+			var score = 100 / average - 100;
 			var msg = {
 					"messageType": "SCORE",
 					"score": score
@@ -106,7 +154,8 @@ function stopTest()
 			clearTimeout(timerID);
 			startPressed=false;
             resetcanvas();
-            results[testcount - 1] = 2;
+            results[testcount - 1] = 1;
+						results[testcount] = 1;
 
 			// alert("Too early, 1 sec is your time for this round!");
 			changeMessage("Too early, 1 sec is your time for this round!");
@@ -192,7 +241,7 @@ function resetgame()
 }
 
 function changeMessage(msg) {
-	document.getElementById("ripuli").innerHTML = msg;
+	document.getElementById("asd").innerHTML = msg;
 
 }
 
