@@ -57,7 +57,7 @@ the field is yellow, your result for that round is 1 second.</p>
 var message =  {
                 messageType: "SETTING",
                 options: {
-                    "width": 700, //Integer
+                    "width": 600, //Integer
                     "height": 500 //Integer
                 }
             };
@@ -118,13 +118,13 @@ function stopTest()
 			var score = 100 / average - 100;
 			var msg = {
 					"messageType": "SCORE",
-					"score": score
+					"score": score.toFixed(0)
 			};
 			var resultText = "Your average reaction time is: " + average.toFixed(3) + "s. Score: " + score.toFixed(0);
     	// alert("Your average reaction time is: " + average.toFixed(3) + " Score: " + score.toFixed(0));
 			changeMessage(resultText);
 			resetgame();
-			window.parent.postMessage(score, "*");
+			window.parent.postMessage(msg, "*");
     }
 
 	else if(colourChanged)
